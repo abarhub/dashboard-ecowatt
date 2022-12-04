@@ -51,11 +51,13 @@ public class CacheService {
     public void setCache(DashboardDto dashboard) {
         lastDashboard = dashboard;
         lastDashboard.setDate(LocalDateTime.now());
-        try{
-            LOGGER.info("Ecriture du fichier {}",fileCache);
-            objectMapper.writeValue(fileCache.toFile(),lastDashboard);
-        }catch(Exception e){
-            LOGGER.error("Erreur pour écrire le fichier "+fileCache, e);
+        if(fileCache!=null&&Files.exists(fileCache)) {
+            try {
+                LOGGER.info("Ecriture du fichier {}", fileCache);
+                objectMapper.writeValue(fileCache.toFile(), lastDashboard);
+            } catch (Exception e) {
+                LOGGER.error("Erreur pour écrire le fichier " + fileCache, e);
+            }
         }
     }
 
