@@ -1,3 +1,3 @@
 export enum Statut {
-  OK, KO, WARN, UNKNOW
+  OK="OK", KO="KO", WARN="WARN", UNKNOW="UNKNOW"
 }

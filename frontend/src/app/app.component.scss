@@ -1,0 +1,46 @@
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.liste-journees {
+  display: flex;
+  flex-direction: column;
+}
+
+.resume-journee{
+  display: flex;
+  flex-direction: row;
+}
+
+.details-journee {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.status-ko {
+  background-color: red;
+}
+
+.status-ok {
+  background-color: #00af00;
+}
+
+.status-warn {
+  background-color: orange;
+}
+
+.status-unknow {
+  background-color: #e02aff;
+}
+
+.status-heure {
+  width: 30px;
+}
+
+.statut{
+  border-left: 1px solid;
+  border-right: 1px solid;
+}

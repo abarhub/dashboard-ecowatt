@@ -1,28 +1,26 @@
 
-<form [formGroup]="identForm">
+<button (click)="load()">Recharger</button>
 
-  <label for="secretKey">Secret Key: </label>
-  <input id="secretKey" type="text" formControlName="secretKey">
-
-</form>
-
-<button (click)="load()">OK</button>
-<button (click)="load2()">OK2</button>
-
-<div *ngIf="dashboard?.listJournees">
-  <div *ngFor="let journee of dashboard.listJournees">
-    <p>{{journee.date}}</p>
-    <p>{{journee.statut}}</p>
-    <p>{{journee.message}}</p>
+<div *ngIf="dashboard?.listJournees" class="container">
+  <div *ngFor="let journee of dashboard.listJournees" class="liste-journees">
+    <div class="resume-journee">
+      <div>Journée : {{journee.date}}</div>
+      <div>Statut : {{journee.statut}}</div>
+      <div>Message : {{journee.message}}</div>
+    </div>
+    <div class="details-journee">
+      <div *ngFor="let heure of journee.heures; let isFirst = first;let isLast = last;let index = index">
+        <div [title]="heure.heure+'h - '+heure.statusEnum" class="status-heure">
+          <div [ngClass]="{'status-ko' : heure.statusEnum===Statut.KO,
+         'status-ok':heure.statusEnum===Statut.OK,
+         'status-warn':heure.statusEnum===Statut.WARN,
+         'status-unknow':heure.statusEnum===Statut.UNKNOW}" class="statut">&nbsp;</div>
+          <div><span *ngIf="heure.heure%3==0||isFirst||isLast||(index>0&&journee.heures[index-1].statusEnum!==heure.statusEnum)">{{heure.heure}}h</span></div>
+          </div>
+      </div>
+    </div>
+    <hr/>
   </div>
 </div>
 
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-<router-outlet></router-outlet>
+<!--<router-outlet></router-outlet>-->

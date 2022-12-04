@@ -46,19 +46,14 @@ public class EcowattService {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(this.configProperties.getUrlOAuth2())
                 .build();
-//                .create(this.configProperties.getUrlOAuth2());
         clientEcowatt = WebClient
                 .builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
-//                .filters(exchangeFilterFunctions -> {
-//                    exchangeFilterFunctions.add(logRequest());
-//                    exchangeFilterFunctions.add(logResponse());
-//                })
                 .baseUrl(this.configProperties.getUrlEcowatt())
                 .build();
     }
 
-    public Mono<DashboardDto> getEcowatt() {
+    public Mono<EcowattDto> getEcowatt() {
         var uriSpec = clientOAuth2.post();
         WebClient.RequestBodySpec bodySpec = uriSpec.uri("");
         WebClient.RequestHeadersSpec<?> headersSpec = bodySpec.bodyValue("");
@@ -66,17 +61,10 @@ public class EcowattService {
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
-//                .ifNoneMatch("*")
-//                .ifModifiedSince(ZonedDateTime.now())
                 .header("Authorization", "Basic " + configProperties.getSecretKey())
                 .retrieve();
         LOGGER.info("res2={}", responseSpec);
         var res1 = responseSpec.bodyToMono(AccessKeyDto.class)
-//                .map(x->{
-//                    EcowattDto ecowattDto=new EcowattDto();
-//                    ecowattDto.setS(x.getAccessToken());
-//                    return ecowattDto;
-//                });
                 .flatMap(x -> {
                     LOGGER.info("res0={}", x);
                     if (x.getAccess_token() != null) {
@@ -86,115 +74,33 @@ public class EcowattService {
                         return res;
                     } else {
                         LOGGER.info("empty");
-                        return Mono.just(new DashboardDto());
+                        return Mono.just(new EcowattDto());
                     }
                 });
-
-//        if(res1.)
 
         LOGGER.info("res={}", res1);
         return res1;
     }
 
-    private Mono<DashboardDto> getWeb(String accessToken) {
+    private Mono<EcowattDto> getWeb(String accessToken) {
         LOGGER.info("getWeb");
-        var uriSpec = clientEcowatt.get();
-//        WebClient.RequestBodySpec bodySpec = uriSpec.uri("");
-        WebClient.RequestHeadersSpec<?> headersSpec = uriSpec;
+        WebClient.RequestHeadersSpec<?> headersSpec = clientEcowatt.get();
         WebClient.ResponseSpec responseSpec = headersSpec.header(
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
-//                .ifNoneMatch("*")
-//                .ifModifiedSince(ZonedDateTime.now())
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve();
         var res1 = responseSpec.bodyToMono(EcowattDto.class)
-//                .map(x->{
-//                    LOGGER.info("ecowattDto x={}",x);
-//                    EcowattDto ecowattDto=new EcowattDto();
-//                    ecowattDto.setS("XXX");
-//                    LOGGER.info("ecowattDto={}",ecowattDto);
-//                    return ecowattDto;
-//                })
                 .map(x -> {
                     LOGGER.info("ecowattDto={}", x);
                     return x;
-                })
-                .map(x -> {
-                    return convertie(x);
                 });
         ;
         LOGGER.info("res1={}", res1);
         return res1;
     }
 
-    private DashboardDto convertie(EcowattDto ecowattDto) {
-        DashboardDto dashboardDto = new DashboardDto();
-        if (ecowattDto != null && !CollectionUtils.isEmpty(ecowattDto.getSignals())) {
-            dashboardDto.setListJournees(new ArrayList<>());
-            for (var journee : ecowattDto.getSignals()) {
-                JourneeDto journeeDto = new JourneeDto();
-                journeeDto.setMessage(journee.getMessage());
-                journeeDto.setStatut(convertieStatut(journee.getDvalue()));
-                if (StringUtils.hasText(journee.getJour())) {
-                    var zdt = ZonedDateTime.parse(journee.getJour());
-                    journeeDto.setDate(zdt.toLocalDate());
-                }
-                if (!CollectionUtils.isEmpty(journee.getValues())) {
-                    journeeDto.setHeures(new ArrayList<>());
-                    for (var heure : journee.getValues()) {
-                        HeureDto heureDto = new HeureDto();
-                        heureDto.setHeure(heure.getPas());
-                        heureDto.setStatusEnum(convertieStatut(heure.getHvalue()));
-                        journeeDto.getHeures().add(heureDto);
-                    }
-                }
-                dashboardDto.getListJournees().add(journeeDto);
-            }
-        }
-        return dashboardDto;
-    }
 
-    private StatusEnum convertieStatut(int statut) {
-        switch (statut) {
-            case 1:
-                return StatusEnum.OK;
-            case 2:
-                return StatusEnum.WARN;
-            case 3:
-                return StatusEnum.KO;
-            default:
-                throw new IllegalArgumentException("Statut '" + statut + "' invalide");
-        }
-    }
-
-    private ExchangeFilterFunction logRequest() {
-        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            if (LOGGER.isDebugEnabled()) {
-                StringBuilder sb = new StringBuilder("Request: \n");
-                //append clientRequest method and url
-                clientRequest
-                        .headers()
-                        .forEach((name, values) -> values.forEach(value -> sb.append(value + ";")));
-                LOGGER.debug(sb.toString());
-            }
-            return Mono.just(clientRequest);
-        });
-    }
-
-    private ExchangeFilterFunction logResponse() {
-        return ExchangeFilterFunction.ofRequestProcessor(clientResponse -> {
-            if (LOGGER.isDebugEnabled()) {
-                StringBuilder sb = new StringBuilder("Response: \n");
-                //append clientRequest method and url
-                clientResponse
-                        .headers()
-                        .forEach((name, values) -> values.forEach(value -> sb.append(value + ";")));
-                LOGGER.debug(sb.toString());
-            }
-            return Mono.just(clientResponse);
-        });
-    }
 
 }
