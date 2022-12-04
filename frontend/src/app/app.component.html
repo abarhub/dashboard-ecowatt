@@ -7,7 +7,15 @@
 </form>
 
 <button (click)="load()">OK</button>
+<button (click)="load2()">OK2</button>
 
+<div *ngIf="dashboard?.listJournees">
+  <div *ngFor="let journee of dashboard.listJournees">
+    <p>{{journee.date}}</p>
+    <p>{{journee.statut}}</p>
+    <p>{{journee.message}}</p>
+  </div>
+</div>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {EMPTY, Observable} from "rxjs";
 import {FormControl, FormGroup} from "@angular/forms";
+import {Dashboard} from "./dto/dashboard";
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ export class AppComponent {
   identForm = new FormGroup({
     secretKey: new FormControl('')
   });
+  dashboard:Dashboard=new Dashboard();
 
   constructor(private http: HttpClient) {
 
@@ -57,6 +59,18 @@ export class AppComponent {
     const urlOAuth2='https://digital.iservices.rte-france.com/open_api/ecowatt/v4/sandbox/signals';
     return this.http.get<OAuth2>(urlOAuth2);
   }
+
+  load2() {
+    this.getEcowatt().subscribe(x=>{
+      console.log('ecowatt',x);
+      this.dashboard=x;
+    });
+  }
+
+  getEcowatt():Observable<Dashboard> {
+    return this.http.get<Dashboard>('api/main');
+  }
+
 }
 
 export class OAuth2{
