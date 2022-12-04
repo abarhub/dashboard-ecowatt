@@ -5,7 +5,7 @@
   </div>
 
 <div *ngIf="dashboard?.listJournees" class="container">
-  <div>Date de la version: {{dashboard.date | date:'d/MM/yyyy HH:mm:ss'}}</div>
+  <div>Date de la mise à jour : {{dashboard.date | date:'d/MM/yyyy HH:mm:ss'}}</div>
   <div *ngFor="let journee of dashboard.listJournees" class="liste-journees">
     <div class="resume-journee">
       <div>Journée : {{journee.date}}</div>
