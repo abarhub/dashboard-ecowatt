@@ -9,7 +9,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
@@ -31,18 +30,18 @@ public class CacheService {
         objectMapper.findAndRegisterModules();
     }
 
-    public void loadCacheFromFile(){
-        var file=configProperties.getFile();
-        if(StringUtils.hasText(file)){
-            fileCache=Path.of(file).toAbsolutePath();
-            if(Files.exists(fileCache)){
+    public void loadCacheFromFile() {
+        var file = configProperties.getFile();
+        if (StringUtils.hasText(file)) {
+            fileCache = Path.of(file).toAbsolutePath();
+            if (Files.exists(fileCache)) {
                 try {
                     var dashboard = objectMapper.readValue(fileCache.toFile(), DashboardDto.class);
-                    if(dashboard!=null&&!CollectionUtils.isEmpty(dashboard.getListJournees())){
-                        lastDashboard=dashboard;
+                    if (dashboard != null && !CollectionUtils.isEmpty(dashboard.getListJournees())) {
+                        lastDashboard = dashboard;
                     }
-                }catch(Exception e){
-                    LOGGER.error("Erreur pour lire le fichier "+fileCache, e);
+                } catch (Exception e) {
+                    LOGGER.error("Erreur pour lire le fichier " + fileCache, e);
                 }
             }
         }
@@ -51,8 +50,20 @@ public class CacheService {
     public void setCache(DashboardDto dashboard) {
         lastDashboard = dashboard;
         lastDashboard.setDate(LocalDateTime.now());
-        if(fileCache!=null&&Files.exists(fileCache)) {
+        if (fileCache != null) {
             try {
+                if (Files.exists(fileCache)) {
+                    int i = 2;
+                    Path p = fileCache.getParent().resolve(fileCache.getFileName() + "_" + i);
+                    while (Files.exists(p)) {
+                        i++;
+                        p = fileCache.getParent().resolve(fileCache.getFileName() + "_" + i);
+                    }
+                    if (Files.notExists(p)) {
+                        LOGGER.atInfo().log("Renomage du fichier '{}' vers '{}'", fileCache, p);
+                        Files.move(fileCache, p);
+                    }
+                }
                 LOGGER.info("Ecriture du fichier {}", fileCache);
                 objectMapper.writeValue(fileCache.toFile(), lastDashboard);
             } catch (Exception e) {

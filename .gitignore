@@ -3,3 +3,5 @@ frontend/node/
 frontend/target/
 target/
 data/lastcall.json
+/data/lastcall.json_2
+data/lastcall.*
