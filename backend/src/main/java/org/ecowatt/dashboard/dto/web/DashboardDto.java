@@ -5,8 +5,18 @@ import java.util.List;
 
 public class DashboardDto {
 
+    private LocalDateTime dateEcowatt;
+
     private LocalDateTime date;
     private List<JourneeDto> listJournees;
+
+    public LocalDateTime getDateEcowatt() {
+        return dateEcowatt;
+    }
+
+    public void setDateEcowatt(LocalDateTime dateEcowatt) {
+        this.dateEcowatt = dateEcowatt;
+    }
 
     public List<JourneeDto> getListJournees() {
         return listJournees;

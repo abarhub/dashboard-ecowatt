@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {EMPTY, Observable} from "rxjs";
 import {FormControl, FormGroup} from "@angular/forms";
@@ -10,11 +10,8 @@ import {Statut} from "./dto/statut";
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
   title = 'dashboard-ecowatt';
-  identForm = new FormGroup({
-    secretKey: new FormControl('')
-  });
   dashboard:Dashboard=new Dashboard();
 
   public readonly Statut : typeof Statut = Statut;
@@ -22,6 +19,11 @@ export class AppComponent {
   constructor(private http: HttpClient) {
 
   }
+
+  ngOnInit(): void {
+    this.load();
+  }
+
   load() {
     this.getEcowatt().subscribe(x=>{
       console.log('ecowatt',x);

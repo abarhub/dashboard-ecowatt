@@ -14,8 +14,8 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 public class MainService {
@@ -23,9 +23,6 @@ public class MainService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainService.class);
 
     private final EcowattService ecowattService;
-
-//    private DashboardDto lastDashboard;
-//    private LocalDateTime dateDernierAppel;
 
     private final ConfigProperties configProperties;
 
@@ -39,7 +36,7 @@ public class MainService {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.cacheService.loadCacheFromFile();
     }
 
@@ -49,13 +46,13 @@ public class MainService {
         LOGGER.info("f={}", configProperties.getFile());
         if (cacheService.isInvalide()) {
             LOGGER.info("Appel de EcoWatt");
-            return ecowattService.getEcowatt().map(x -> {
-                var res = convertie(x);
-//                lastDashboard = res;
-//                dateDernierAppel = LocalDateTime.now();
-                cacheService.setCache(res);
-                return res;
-            });
+            return ecowattService.getEcowatt()
+                    .map(x -> {
+                        var res = convertie(x);
+                        cacheService.setCache(res);
+                        return res;
+                    })
+                    .switchIfEmpty(Mono.justOrEmpty(cacheService.getCache()));
         } else {
             LOGGER.info("Recuperation du cache");
             return Mono.justOrEmpty(cacheService.getCache());
@@ -67,6 +64,15 @@ public class MainService {
         if (ecowattDto != null && !CollectionUtils.isEmpty(ecowattDto.getSignals())) {
             dashboardDto.setListJournees(new ArrayList<>());
             for (var journee : ecowattDto.getSignals()) {
+                if (dashboardDto.getDateEcowatt() == null && StringUtils.hasText(journee.getGenerationFichier())) {
+                    try {
+                        var zdt = ZonedDateTime.parse(journee.getGenerationFichier());
+                        dashboardDto.setDateEcowatt(zdt.toLocalDateTime());
+                    } catch (DateTimeParseException e) {
+                        LOGGER.atError().setCause(e).addKeyValue("date", journee.getGenerationFichier())
+                                .log("Erreur pour parser la date du fichier");
+                    }
+                }
                 JourneeDto journeeDto = new JourneeDto();
                 journeeDto.setMessage(journee.getMessage());
                 journeeDto.setStatut(convertieStatut(journee.getDvalue()));

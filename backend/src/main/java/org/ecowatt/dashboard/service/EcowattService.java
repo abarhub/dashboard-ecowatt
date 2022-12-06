@@ -3,27 +3,19 @@ package org.ecowatt.dashboard.service;
 import io.netty.handler.logging.LogLevel;
 import org.ecowatt.dashboard.dto.rte.AccessKeyDto;
 import org.ecowatt.dashboard.dto.rte.EcowattDto;
-import org.ecowatt.dashboard.dto.web.DashboardDto;
-import org.ecowatt.dashboard.dto.web.HeureDto;
-import org.ecowatt.dashboard.dto.web.JourneeDto;
-import org.ecowatt.dashboard.dto.web.StatusEnum;
 import org.ecowatt.dashboard.properties.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 
 public class EcowattService {
 
@@ -74,7 +66,8 @@ public class EcowattService {
                         return res;
                     } else {
                         LOGGER.info("empty");
-                        return Mono.just(new EcowattDto());
+                        Mono<EcowattDto> res = Mono.empty();
+                        return res;
                     }
                 });
 
@@ -90,7 +83,12 @@ public class EcowattService {
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .header("Authorization", "Bearer " + accessToken)
-                .retrieve();
+                .retrieve()
+                .onStatus(httpStatus -> httpStatus.value() == HttpStatus.TOO_MANY_REQUESTS.value(),
+                        error -> {
+                            LOGGER.atWarn().log("too many request (code={})", error);
+                            return Mono.empty();
+                        });
         var res1 = responseSpec.bodyToMono(EcowattDto.class)
                 .map(x -> {
                     LOGGER.info("ecowattDto={}", x);
@@ -100,7 +98,6 @@ public class EcowattService {
         LOGGER.info("res1={}", res1);
         return res1;
     }
-
 
 
 }

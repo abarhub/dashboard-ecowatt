@@ -1,5 +1,7 @@
 package org.ecowatt.dashboard.dto.rte;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -13,6 +15,7 @@ public class JourneeEcowattDto {
 
     private List<StatutEcowatDto> values;
 
+    @JsonProperty("GenerationFichier")
     public String getGenerationFichier() {
         return GenerationFichier;
     }

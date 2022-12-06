@@ -1,31 +1,45 @@
 
 <div class="page">
+
   <div>
-    <button (click)="load()">Recharger</button>
+
   </div>
 
-<div *ngIf="dashboard?.listJournees" class="container">
-  <div>Date de la mise à jour : {{dashboard.date | date:'d/MM/yyyy HH:mm:ss'}}</div>
-  <div *ngFor="let journee of dashboard.listJournees" class="liste-journees">
-    <div class="resume-journee">
-      <div>Journée : {{journee.date}}</div>
-      <div>Statut : {{journee.statut}}</div>
-      <div>Message : {{journee.message}}</div>
+  <div>
+
+    <div>
+      <button (click)="load()">Recharger</button>
     </div>
-    <div class="details-journee">
-      <div *ngFor="let heure of journee.heures; let isFirst = first;let isLast = last;let index = index">
-        <div [title]="heure.heure+'h - '+heure.statusEnum" class="status-heure">
-          <div [ngClass]="{'status-ko' : heure.statusEnum===Statut.KO,
-         'status-ok':heure.statusEnum===Statut.OK,
-         'status-warn':heure.statusEnum===Statut.WARN,
-         'status-unknow':heure.statusEnum===Statut.UNKNOW}" class="statut">&nbsp;</div>
-          <div><span *ngIf="heure.heure%3==0||isFirst||isLast||(index>0&&journee.heures[index-1].statusEnum!==heure.statusEnum)">{{heure.heure}}h</span></div>
+
+    <div *ngIf="dashboard?.listJournees" class="container">
+      <div>Date de la mise à jour : {{dashboard.dateEcowatt | date:'d/MM/yyyy HH:mm:ss'}}</div>
+      <div *ngFor="let journee of dashboard.listJournees" class="liste-journees">
+        <div class="resume-journee">
+          <div>Journée : {{journee.date}}</div>
+          <div>Statut : {{journee.statut}}</div>
+          <div>Message : {{journee.message}}</div>
+        </div>
+        <div class="details-journee">
+          <div *ngFor="let heure of journee.heures; let isFirst = first;let isLast = last;let index = index">
+            <div [title]="heure.heure+'h - '+heure.statusEnum" class="status-heure">
+              <div [ngClass]="{'status-ko' : heure.statusEnum===Statut.KO,
+             'status-ok':heure.statusEnum===Statut.OK,
+             'status-warn':heure.statusEnum===Statut.WARN,
+             'status-unknow':heure.statusEnum===Statut.UNKNOW}" class="statut">&nbsp;</div>
+              <div><span *ngIf="heure.heure%3==0||isFirst||isLast||(index>0&&journee.heures[index-1].statusEnum!==heure.statusEnum)">{{heure.heure}}h</span></div>
+              </div>
           </div>
+        </div>
+        <hr/>
       </div>
     </div>
-    <hr/>
+
   </div>
-</div>
+
+  <div>
+
+  </div>
+
 </div>
 
 <app-spinner></app-spinner>
