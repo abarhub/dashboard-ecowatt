@@ -19,6 +19,8 @@ public class ConfigProperties {
 
     private Duration dureeCache;
 
+    private String cronRechargement;
+
     public String getUrlOAuth2() {
         return urlOAuth2;
     }
@@ -57,5 +59,13 @@ public class ConfigProperties {
 
     public void setDureeCache(Duration dureeCache) {
         this.dureeCache = dureeCache;
+    }
+
+    public String getCronRechargement() {
+        return cronRechargement;
+    }
+
+    public void setCronRechargement(String cronRechargement) {
+        this.cronRechargement = cronRechargement;
     }
 }

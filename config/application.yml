@@ -6,10 +6,12 @@ app:
   secretKey:
   file: data/lastcall.json
   dureeCache: 1m
+  cronRechargement: '0 15 * * * *'
 
 logging:
   level:
     #reactor.netty.http.client: DEBUG
+    #reactor.netty.http.client: TRACE
     #root: DEBUG
     org.ecowatt.dashboard: DEBUG
 
