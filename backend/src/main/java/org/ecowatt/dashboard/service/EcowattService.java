@@ -52,7 +52,7 @@ public class EcowattService {
     }
 
     public Mono<EcowattDto> getEcowatt() {
-        if(false){
+        if(true){
             return getEcowatt2();
         } else {
             return getEcowatt3();
@@ -63,8 +63,11 @@ public class EcowattService {
         LOGGER.info("getWeb2");
 //        WebClient.RequestHeadersSpec<?> headersSpec = clientEcowatt.get();
         WebClient.RequestHeadersSpec<?> headersSpec = webClient.get()
-                .uri(this.configProperties.getUrlEcowatt());
-        WebClient.ResponseSpec responseSpec = headersSpec.header(
+                .uri(this.configProperties.getUrlEcowatt())
+                ;
+//        WebClient.ResponseSpec
+        var
+                responseSpec = headersSpec.header(
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
@@ -72,17 +75,35 @@ public class EcowattService {
 //                .attributes(
 //                        ServerOAuth2AuthorizedClientExchangeFilterFunction
 //                                .clientRegistrationId(Constantes.OAUTH_CLIENT))
-                .retrieve()
-                .onStatus(httpStatus -> httpStatus.value() == HttpStatus.TOO_MANY_REQUESTS.value(),
-                        error -> {
-                            LOGGER.atWarn().log("too many request (code={})", error);
-                            return Mono.empty();
-                        });
-        var res1 = responseSpec.bodyToMono(EcowattDto.class)
-                .map(x -> {
-                    LOGGER.info("ecowattDto={}", x);
-                    return x;
-                });
+                .exchangeToMono((x)->{
+                    LOGGER.info("body str");
+                    return x.bodyToMono(String.class);
+//                    return x;
+                })
+
+//                .retrieve()
+//                .onStatus(httpStatus -> httpStatus.value() == HttpStatus.TOO_MANY_REQUESTS.value(),
+//                        error -> {
+//                            LOGGER.atWarn().log("too many request (code={})", error);
+//                            return Mono.empty();
+//                        })
+//                .onStatus((x)->x.isError(), clientResponse -> {
+//                    var res = clientResponse.bodyToMono(String.class);
+//                    res.log()
+//                                    .subscribe((x)->{
+//                                        LOGGER.atInfo().log("response erreur: {}",x);
+//                                    });
+//
+//                    return Mono.error(new RuntimeException("Erreur http"));
+//                        }
+//                )
+                ;
+//        var res1 = responseSpec.bodyToMono(EcowattDto.class)
+//                .map(x -> {
+//                    LOGGER.info("ecowattDto={}", x);
+//                    return x;
+//                });
+        var res1=responseSpec.cast(EcowattDto.class);
         ;
         LOGGER.info("res2={}", res1);
         return res1;

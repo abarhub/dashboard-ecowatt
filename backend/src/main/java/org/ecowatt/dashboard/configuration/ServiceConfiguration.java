@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
@@ -25,6 +26,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 @Configuration
 @EnableConfigurationProperties(ConfigProperties.class)
@@ -90,18 +92,61 @@ public class ServiceConfiguration {
 
     @Bean//(name = "myprovider")
     WebClient webClient(ReactiveClientRegistrationRepository clientRegistrations) {
+
+        HttpClient httpClient = HttpClient
+                .create()
+                .wiretap(true);
         InMemoryReactiveOAuth2AuthorizedClientService clientService = new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrations);
         AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager = new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clientRegistrations, clientService);
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oauth.setDefaultClientRegistrationId(Constantes.OAUTH_CLIENT);
+        //oauth.filter()
         return WebClient.builder()
-                .filter(oauth)
                 .filters(exchangeFilterFunctions -> {
-                    exchangeFilterFunctions.add(logRequest());
-                    exchangeFilterFunctions.add(logResponse());
+                    exchangeFilterFunctions.add(logRequest3());
+                    exchangeFilterFunctions.add(logResponseStatus());
+                    exchangeFilterFunctions.add(oauth);
                 })
+                //.filter(logRequest2())
+//                .filters(exchangeFilterFunctions -> {
+//                    exchangeFilterFunctions.add(logRequest());
+//                    exchangeFilterFunctions.add(logResponse());
+//                })
+//                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                //.filter(oauth)
                 .build();
 
+    }
+    private ExchangeFilterFunction logRequest2() {
+        return (clientRequest, next) -> {
+            LOGGER.info("Request2: {} {}", clientRequest.method(), clientRequest.url());
+            clientRequest.headers()
+                    .forEach((name, values) -> values.forEach(value -> LOGGER.info("headers {}={}", name, value)));
+            //clientRequest.body().insert()
+            return next.exchange(clientRequest);
+        };
+    }
+
+    private ExchangeFilterFunction logRequest3() {
+        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
+            LOGGER.info("Request3: {} {}", clientRequest.method(), clientRequest.url());
+            clientRequest.headers()
+                    .forEach((name, values) -> values.forEach(value -> LOGGER.info("header3 {}={}", name, value)));
+            var res=clientRequest.body();
+            LOGGER.atInfo().log("request body: {}",res);
+//            var res = clientResponse.bodyToMono(String.class);
+//            res.log()
+//                    .subscribe((x)->{
+//                        LOGGER.atInfo().log("response erreur: {}",x);
+//                    });
+            return Mono.just(clientRequest);
+        });
+    }
+    private ExchangeFilterFunction logResponseStatus() {
+        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
+            LOGGER.info("Response3 Status {}", clientResponse.statusCode());
+            return Mono.just(clientResponse);
+        });
     }
 
     ExchangeFilterFunction logRequest() {
