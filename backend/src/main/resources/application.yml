@@ -6,13 +6,17 @@ app:
   file:
   dureeCache:
   cronRechargement:
-
-spring.security.oauth2.client.registration.ecowatt:
-          authorization-grant-type: client_credentials
-          client-id: ecowatt
-          client-secret: ${app.secretKey}
-
-spring.security.oauth2.client.provider.ecowatt.token-uri: ${app.urlOAuth2}
+#
+#spring.security.oauth2.client:
+#      registration:
+#        ecowatt:
+#          #authorization-grant-type: client_credentials
+#          authorization-grant-type: password
+#          client-id: ecowatt
+#          client-secret: ${app.secretKey}
+#          provider: ecowatt
+#      provider:
+#        ecowatt.token-uri: ${app.urlOAuth2}
 
 #security.ignored: /**
 #spring.security.enabled: false

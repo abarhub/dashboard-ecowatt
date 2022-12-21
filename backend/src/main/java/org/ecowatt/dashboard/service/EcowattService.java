@@ -1,7 +1,6 @@
 package org.ecowatt.dashboard.service;
 
 import io.netty.handler.logging.LogLevel;
-import org.ecowatt.dashboard.constantes.Constantes;
 import org.ecowatt.dashboard.dto.rte.AccessKeyDto;
 import org.ecowatt.dashboard.dto.rte.EcowattDto;
 import org.ecowatt.dashboard.properties.ConfigProperties;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
@@ -29,8 +27,6 @@ public class EcowattService {
     private final WebClient clientOAuth2;
 
     private final WebClient clientEcowatt;
-    @Autowired
-    private WebClient webClient;
 
 
     public EcowattService(ConfigProperties configProperties) {
@@ -52,64 +48,6 @@ public class EcowattService {
     }
 
     public Mono<EcowattDto> getEcowatt() {
-        if(true){
-            return getEcowatt2();
-        } else {
-            return getEcowatt3();
-        }
-    }
-
-    public Mono<EcowattDto> getEcowatt2() {
-        LOGGER.info("getWeb2");
-//        WebClient.RequestHeadersSpec<?> headersSpec = clientEcowatt.get();
-        WebClient.RequestHeadersSpec<?> headersSpec = webClient.get()
-                .uri(this.configProperties.getUrlEcowatt())
-                ;
-//        WebClient.ResponseSpec
-        var
-                responseSpec = headersSpec.header(
-                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-                .acceptCharset(StandardCharsets.UTF_8)
-//                .header("Authorization", "Bearer " + accessToken)
-//                .attributes(
-//                        ServerOAuth2AuthorizedClientExchangeFilterFunction
-//                                .clientRegistrationId(Constantes.OAUTH_CLIENT))
-                .exchangeToMono((x)->{
-                    LOGGER.info("body str");
-                    return x.bodyToMono(String.class);
-//                    return x;
-                })
-
-//                .retrieve()
-//                .onStatus(httpStatus -> httpStatus.value() == HttpStatus.TOO_MANY_REQUESTS.value(),
-//                        error -> {
-//                            LOGGER.atWarn().log("too many request (code={})", error);
-//                            return Mono.empty();
-//                        })
-//                .onStatus((x)->x.isError(), clientResponse -> {
-//                    var res = clientResponse.bodyToMono(String.class);
-//                    res.log()
-//                                    .subscribe((x)->{
-//                                        LOGGER.atInfo().log("response erreur: {}",x);
-//                                    });
-//
-//                    return Mono.error(new RuntimeException("Erreur http"));
-//                        }
-//                )
-                ;
-//        var res1 = responseSpec.bodyToMono(EcowattDto.class)
-//                .map(x -> {
-//                    LOGGER.info("ecowattDto={}", x);
-//                    return x;
-//                });
-        var res1=responseSpec.cast(EcowattDto.class);
-        ;
-        LOGGER.info("res2={}", res1);
-        return res1;
-    }
-
-    public Mono<EcowattDto> getEcowatt3() {
         var uriSpec = clientOAuth2.post();
         WebClient.RequestBodySpec bodySpec = uriSpec.uri("");
         WebClient.RequestHeadersSpec<?> headersSpec = bodySpec.bodyValue("");
