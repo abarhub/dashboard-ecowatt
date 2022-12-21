@@ -1,6 +1,9 @@
 package org.ecowatt.dashboard.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.abarhub.vfs.core.api.VFS4JFiles;
+import io.github.abarhub.vfs.core.api.path.VFS4JPathName;
+import io.github.abarhub.vfs.core.api.path.VFS4JPaths;
 import org.ecowatt.dashboard.dto.fichier.Fichier;
 import org.ecowatt.dashboard.dto.web.DashboardDto;
 import org.ecowatt.dashboard.properties.ConfigProperties;
@@ -22,10 +25,13 @@ public class CacheService {
 
     private Fichier fichier;
 
-    private Path fileCache;
+    private VFS4JPathName fileCache;
 
-    public CacheService(ConfigProperties configProperties) {
+    private final FileService fileService;
+
+    public CacheService(ConfigProperties configProperties, FileService fileService) {
         this.configProperties = configProperties;
+        this.fileService=fileService;
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
         fichier = new Fichier();
@@ -33,19 +39,23 @@ public class CacheService {
     }
 
     public void loadCacheFromFile() {
-        var file = configProperties.getFile();
-        if (StringUtils.hasText(file)) {
-            fileCache = Path.of(file).toAbsolutePath();
-            if (Files.exists(fileCache)) {
-                try {
-                    var fichier = objectMapper.readValue(fileCache.toFile(), Fichier.class);
+        var file=fileService.getFile();
+        if(file!=null) {
+            fileCache = file;
+        }
+//        var file = configProperties.getFile();
+//        if (StringUtils.hasText(file)) {
+        if(fileCache!=null&&VFS4JFiles.exists(fileCache)){
+//            if (Files.exists(fileCache)) {
+                try(var reader=VFS4JFiles.newReader(fileCache)) {
+                    var fichier = objectMapper.readValue(reader, Fichier.class);
                     if (fichier != null) {
                         this.fichier = fichier;
                     }
                 } catch (Exception e) {
                     LOGGER.error("Erreur pour lire le fichier " + fileCache, e);
                 }
-            }
+//            }
         }
     }
 
@@ -57,24 +67,26 @@ public class CacheService {
         fichier.setUrl(configProperties.getUrlEcowatt());
         if (fileCache != null) {
             try {
-                if (Files.exists(fileCache)) {
+                if (VFS4JFiles.exists(fileCache)) {
                     int i = 1;
-                    Path rootPath = fileCache.getParent().resolve("backup");
-                    if (Files.notExists(rootPath)) {
-                        Files.createDirectories(rootPath);
+                    var rootPath = fileService.getBackupDirectory();
+                    if (VFS4JFiles.notExists(rootPath)) {
+                        VFS4JFiles.createDirectories(rootPath);
                     }
-                    Path p = rootPath.resolve(fileCache.getFileName() + "_" + i);
-                    while (Files.exists(p)) {
+                    var p = rootPath.resolve(fileCache.getFilename() + "_" + i);
+                    while (VFS4JFiles.exists(p)) {
                         i++;
-                        p = rootPath.resolve(fileCache.getFileName() + "_" + i);
+                        p = rootPath.resolve(fileCache.getFilename() + "_" + i);
                     }
-                    if (Files.notExists(p)) {
+                    if (VFS4JFiles.notExists(p)) {
                         LOGGER.atInfo().log("Renomage du fichier '{}' vers '{}'", fileCache, p);
-                        Files.move(fileCache, p);
+                        VFS4JFiles.move(fileCache, p);
                     }
                 }
                 LOGGER.info("Ecriture du fichier {}", fileCache);
-                objectMapper.writeValue(fileCache.toFile(), fichier);
+                try(var writer= VFS4JFiles.newWriter(fileCache,false)) {
+                    objectMapper.writeValue(writer, fichier);
+                }
             } catch (Exception e) {
                 LOGGER.error("Erreur pour écrire le fichier " + fileCache, e);
             }

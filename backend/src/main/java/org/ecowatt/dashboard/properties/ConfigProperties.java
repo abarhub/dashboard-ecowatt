@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Configuration
 @ConfigurationProperties(prefix = "app")
@@ -15,11 +16,15 @@ public class ConfigProperties {
 
     private String secretKey;
 
-    private String file;
+    private String path;
+
+    private String filename;
 
     private Duration dureeCache;
 
     private String cronRechargement;
+
+    private Map<String,String> vfs4jProperties;
 
     public String getUrlOAuth2() {
         return urlOAuth2;
@@ -45,12 +50,20 @@ public class ConfigProperties {
         this.secretKey = secretKey;
     }
 
-    public String getFile() {
-        return file;
+    public String getPath() {
+        return path;
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public Duration getDureeCache() {
@@ -67,5 +80,13 @@ public class ConfigProperties {
 
     public void setCronRechargement(String cronRechargement) {
         this.cronRechargement = cronRechargement;
+    }
+
+    public Map<String, String> getVfs4jProperties() {
+        return vfs4jProperties;
+    }
+
+    public void setVfs4jProperties(Map<String, String> vfs4jProperties) {
+        this.vfs4jProperties = vfs4jProperties;
     }
 }

@@ -4,9 +4,13 @@ app:
   urlEcowatt: https://digital.iservices.rte-france.com/open_api/ecowatt/v4/sandbox/signals
   #urlEcowatt: https://digital.iservices.rte-france.com/open_api/ecowatt/v4/signals
   secretKey:
-  file: data/lastcall.json
+  path: ./data
+  filename: lastcall.json
   dureeCache: 1m
   cronRechargement: '0 15 * * * *'
+  vfs4jProperties:
+    #vfs.plugins.plugins1.class: io.github.abarhub.vfs.core.plugin.audit.VFS4JAuditPluginsFactory
+    #vfs.plugins.plugins1.operations: COMMAND
 
 logging:
   level:

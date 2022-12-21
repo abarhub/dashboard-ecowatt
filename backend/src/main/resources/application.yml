@@ -3,12 +3,15 @@ app:
   urlOAuth2:
   urlEcowatt:
   secretKey:
-  file:
+  path:
+  filename:
   dureeCache:
   cronRechargement:
+  vfs4j.properties:
 
 #security.ignored: /**
 #spring.security.enabled: false
 #management.security.enabled: false
 #security.basic.enabled: false
+
 

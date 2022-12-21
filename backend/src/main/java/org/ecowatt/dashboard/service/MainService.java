@@ -6,7 +6,6 @@ import org.ecowatt.dashboard.dto.web.DashboardDto;
 import org.ecowatt.dashboard.dto.web.HeureDto;
 import org.ecowatt.dashboard.dto.web.JourneeDto;
 import org.ecowatt.dashboard.dto.web.StatusEnum;
-import org.ecowatt.dashboard.properties.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -23,14 +22,11 @@ public class MainService {
 
     private final EcowattService ecowattService;
 
-    private final ConfigProperties configProperties;
 
     private final CacheService cacheService;
 
-    public MainService(EcowattService ecowattService, ConfigProperties configProperties,
-                       CacheService cacheService) {
+    public MainService(EcowattService ecowattService, CacheService cacheService) {
         this.ecowattService = ecowattService;
-        this.configProperties = configProperties;
         this.cacheService = cacheService;
     }
 
@@ -40,7 +36,6 @@ public class MainService {
     }
 
     public Mono<DashboardDto> getEcowatt() {
-        LOGGER.debug("Fichier de données : {}", configProperties.getFile());
         if (cacheService.isInvalide()) {
             LOGGER.info("Appel de EcoWatt");
             return ecowattService.getEcowatt()
