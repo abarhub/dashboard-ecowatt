@@ -10,9 +10,9 @@ app:
 
 logging:
   level:
-    reactor.netty.http.client: DEBUG
+#    reactor.netty.http.client: DEBUG
     #reactor.netty.http.client: TRACE
-    root: DEBUG
+#    root: DEBUG
     org.ecowatt.dashboard: DEBUG
 
 

@@ -13,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -41,9 +40,7 @@ public class MainService {
     }
 
     public Mono<DashboardDto> getEcowatt() {
-        Path p = Path.of("toto.txt");
-        LOGGER.info("p={}", p.toAbsolutePath());
-        LOGGER.info("f={}", configProperties.getFile());
+        LOGGER.debug("Fichier de données : {}", configProperties.getFile());
         if (cacheService.isInvalide()) {
             LOGGER.info("Appel de EcoWatt");
             return ecowattService.getEcowatt()

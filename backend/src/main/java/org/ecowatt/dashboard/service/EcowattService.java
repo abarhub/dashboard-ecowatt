@@ -6,7 +6,6 @@ import org.ecowatt.dashboard.dto.rte.EcowattDto;
 import org.ecowatt.dashboard.properties.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +16,8 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class EcowattService {
 
@@ -28,6 +29,8 @@ public class EcowattService {
 
     private final WebClient clientEcowatt;
 
+    private Instant cacheDuree;
+    private String token;
 
     public EcowattService(ConfigProperties configProperties) {
         this.configProperties = configProperties;
@@ -48,41 +51,53 @@ public class EcowattService {
     }
 
     public Mono<EcowattDto> getEcowatt() {
-        var uriSpec = clientOAuth2.post();
-        WebClient.RequestBodySpec bodySpec = uriSpec.uri("");
-        WebClient.RequestHeadersSpec<?> headersSpec = bodySpec.bodyValue("");
-        WebClient.ResponseSpec responseSpec = headersSpec.header(
-                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
-                .acceptCharset(StandardCharsets.UTF_8)
-                .header("Authorization", "Basic " + configProperties.getSecretKey())
-                .retrieve();
-        LOGGER.info("res2={}", responseSpec);
-        var res1 = responseSpec.bodyToMono(AccessKeyDto.class)
-                .flatMap(x -> {
-                    LOGGER.info("res0={}", x);
-                    if (x.getAccess_token() != null) {
-                        LOGGER.info("appel getWeb");
-                        var res = getWeb(x.getAccess_token());
-                        LOGGER.info("resultat getWeb={}", res);
-                        return res;
-                    } else {
-                        LOGGER.info("empty");
-                        Mono<EcowattDto> res = Mono.empty();
-                        return res;
-                    }
-                });
 
-        LOGGER.info("res={}", res1);
-        return res1;
+        return getToken()
+                .flatMap(x -> {
+                    var res = getWeb(x);
+                    LOGGER.info("resultat getWeb={}", res);
+                    return res;
+                });
+    }
+
+    private Mono<String> getToken() {
+        if (cacheDuree == null || cacheDuree.isBefore(Instant.now())) {
+            LOGGER.info("Récupération du token");
+            return clientOAuth2.post()
+                    .uri("")
+                    .bodyValue("")
+                    .header(
+                            HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .acceptCharset(StandardCharsets.UTF_8)
+                    .header("Authorization", "Basic " + configProperties.getSecretKey())
+                    .retrieve()
+                    .bodyToMono(AccessKeyDto.class)
+                    .flatMap(x -> {
+                        LOGGER.debug("res0={}", x);
+                        if (x.getAccess_token() != null) {
+                            LOGGER.info("token récupéré");
+                            var t = x.getExpires_in();
+                            LOGGER.atDebug().log("Token valide pour {} ms", t);
+                            if (t > 0) {
+                                cacheDuree = Instant.now().plus(t, ChronoUnit.MILLIS);
+                                token = x.getAccess_token();
+                            }
+                            return Mono.just(x.getAccess_token());
+                        } else {
+                            return Mono.empty();
+                        }
+                    });
+        } else {
+            LOGGER.info("get token en cache");
+            return Mono.just(token);
+        }
     }
 
     private Mono<EcowattDto> getWeb(String accessToken) {
-        LOGGER.info("getWeb");
-        WebClient.RequestHeadersSpec<?> headersSpec = clientEcowatt.get();
-//        WebClient.RequestHeadersSpec<?> headersSpec = webClient.get()
-//                .uri(this.configProperties.getUrlEcowatt());
-        WebClient.ResponseSpec responseSpec = headersSpec.header(
+        LOGGER.info("Récupération des données d'Ecowatt");
+        return clientEcowatt.get()
+                .header(
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
@@ -92,15 +107,12 @@ public class EcowattService {
                         error -> {
                             LOGGER.atWarn().log("too many request (code={})", error);
                             return Mono.empty();
-                        });
-        var res1 = responseSpec.bodyToMono(EcowattDto.class)
+                        })
+                .bodyToMono(EcowattDto.class)
                 .map(x -> {
                     LOGGER.info("ecowattDto={}", x);
                     return x;
                 });
-        ;
-        LOGGER.info("res1={}", res1);
-        return res1;
     }
 
 

@@ -4,6 +4,8 @@ import org.ecowatt.dashboard.dto.rte.EcowattDto;
 import org.ecowatt.dashboard.dto.web.DashboardDto;
 import org.ecowatt.dashboard.service.EcowattService;
 import org.ecowatt.dashboard.service.MainService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +15,8 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api")
 public class MainControler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainControler.class);
+
     private final MainService mainService;
 
     public MainControler(MainService mainService) {
@@ -20,7 +24,8 @@ public class MainControler {
     }
 
     @GetMapping("/main")
-    private Mono<DashboardDto> getEmployeeById() {
+    private Mono<DashboardDto> getEcowatt() {
+        LOGGER.info("getEcowatt controler");
         return mainService.getEcowatt();
     }
 
