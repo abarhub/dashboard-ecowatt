@@ -23,7 +23,8 @@ app:
   urlOAuth2: https://digital.iservices.rte-france.com/token/oauth/
   urlEcowatt: https://digital.iservices.rte-france.com/open_api/ecowatt/v4/sandbox/signals
   secretKey:
-  file: data/lastcall.json
+  path: ./data
+  filename: lastcall.json
   dureeCache: 15m
 ```
 
