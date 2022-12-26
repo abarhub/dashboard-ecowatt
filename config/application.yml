@@ -8,7 +8,7 @@ app:
   filename: lastcall.json
   dureeCache: 1m
   cronRechargement: '0 15 * * * *'
-  vfs4jProperties:
+#  vfs4jProperties:
     #vfs.plugins.plugins1.class: io.github.abarhub.vfs.core.plugin.audit.VFS4JAuditPluginsFactory
     #vfs.plugins.plugins1.operations: COMMAND
 

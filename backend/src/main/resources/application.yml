@@ -7,7 +7,7 @@ app:
   filename:
   dureeCache:
   cronRechargement:
-  vfs4j.properties:
+  #vfs4jProperties:
 
 #security.ignored: /**
 #spring.security.enabled: false
