@@ -8,6 +8,7 @@ import org.ecowatt.dashboard.dto.web.JourneeDto;
 import org.ecowatt.dashboard.dto.web.StatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
@@ -25,6 +26,9 @@ public class MainService {
 
     private final CacheService cacheService;
 
+    @Autowired
+    private MyCustomObservation myCustomObservation;
+
     public MainService(EcowattService ecowattService, CacheService cacheService) {
         this.ecowattService = ecowattService;
         this.cacheService = cacheService;
@@ -36,6 +40,7 @@ public class MainService {
     }
 
     public Mono<DashboardDto> getEcowatt() {
+        myCustomObservation.doSomething();
         if (cacheService.isInvalide()) {
             LOGGER.info("Appel de EcoWatt");
             return ecowattService.getEcowatt()

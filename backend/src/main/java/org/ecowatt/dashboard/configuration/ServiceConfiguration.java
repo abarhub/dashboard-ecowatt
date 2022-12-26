@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @EnableConfigurationProperties(ConfigProperties.class)
@@ -17,8 +18,9 @@ public class ServiceConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceConfiguration.class);
 
     @Bean
-    public EcowattService ecowattService(ConfigProperties configProperties) {
-        return new EcowattService(configProperties);
+    public EcowattService ecowattService(ConfigProperties configProperties,
+                                         WebClient.Builder webClientBuilder) {
+        return new EcowattService(configProperties, webClientBuilder);
     }
 
     @Bean
@@ -41,5 +43,10 @@ public class ServiceConfiguration {
     public FileService fileService(ConfigProperties configProperties) {
         return new FileService(configProperties);
     }
+
+//    @Bean
+//    public WebClient.Builder webClientBuilder(){
+//        return WebClient.builder();
+//    }
 
 }

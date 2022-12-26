@@ -32,19 +32,18 @@ public class EcowattService {
     private Instant cacheDuree;
     private String token;
 
-    public EcowattService(ConfigProperties configProperties) {
+    public EcowattService(ConfigProperties configProperties,
+                          WebClient.Builder webClientBuilder) {
         this.configProperties = configProperties;
         HttpClient httpClient = HttpClient
                 .create()
                 .wiretap("reactor.netty.http.client.HttpClient",
                         LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
-        clientOAuth2 = WebClient
-                .builder()
+        clientOAuth2 = webClientBuilder
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(this.configProperties.getUrlOAuth2())
                 .build();
-        clientEcowatt = WebClient
-                .builder()
+        clientEcowatt = webClientBuilder
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(this.configProperties.getUrlEcowatt())
                 .build();
