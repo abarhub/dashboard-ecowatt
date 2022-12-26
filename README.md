@@ -32,7 +32,11 @@ Pour le paramètre l'url app.urlEcowatt, il faut mettre l'url de RTE :
 * https://digital.iservices.rte-france.com/open_api/ecowatt/v4/sandbox/signals  (pour tester)
 * https://digital.iservices.rte-france.com/open_api/ecowatt/v4/signals
 
-Pour la cle secrete, il faut la créer sur RTE.
+Pour la cle secrete, il faut la créer sur RTE. Pour obtenir un accès aux API de RTE, la procédure est la suivante :
+* Créer un compte sur site API RTE
+* S'inscrire à l'API Ecowatt et cliquer sur "Abonnez-vous à l'API", puis créer un nouvelle application
+* Obtenir le client_id et client_secret (uuid dans les deux cas)
+
 L'api limite les appels à un appel pour 15 minutes.
 Le fichier permet de limiter les appels vers le serveur de RTE.
 
