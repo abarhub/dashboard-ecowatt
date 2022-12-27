@@ -1,5 +1,6 @@
 package org.ecowatt.dashboard.configuration;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.ecowatt.dashboard.properties.ConfigProperties;
 import org.ecowatt.dashboard.service.*;
 import org.slf4j.Logger;
@@ -19,8 +20,9 @@ public class ServiceConfiguration {
 
     @Bean
     public EcowattService ecowattService(ConfigProperties configProperties,
-                                         WebClient.Builder webClientBuilder) {
-        return new EcowattService(configProperties, webClientBuilder);
+                                         WebClient.Builder webClientBuilder,
+                                         EcowattObservation ecowattObservation) {
+        return new EcowattService(configProperties, webClientBuilder, ecowattObservation);
     }
 
     @Bean
@@ -44,9 +46,9 @@ public class ServiceConfiguration {
         return new FileService(configProperties);
     }
 
-//    @Bean
-//    public WebClient.Builder webClientBuilder(){
-//        return WebClient.builder();
-//    }
+    @Bean
+    public EcowattObservation ecowattObservation(ObservationRegistry observationRegistry){
+        return new EcowattObservation(observationRegistry);
+    }
 
 }

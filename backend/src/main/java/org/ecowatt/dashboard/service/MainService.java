@@ -26,9 +26,6 @@ public class MainService {
 
     private final CacheService cacheService;
 
-    @Autowired
-    private MyCustomObservation myCustomObservation;
-
     public MainService(EcowattService ecowattService, CacheService cacheService) {
         this.ecowattService = ecowattService;
         this.cacheService = cacheService;
@@ -40,7 +37,6 @@ public class MainService {
     }
 
     public Mono<DashboardDto> getEcowatt() {
-        myCustomObservation.doSomething();
         if (cacheService.isInvalide()) {
             LOGGER.info("Appel de EcoWatt");
             return ecowattService.getEcowatt()

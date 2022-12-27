@@ -29,12 +29,16 @@ public class EcowattService {
 
     private final WebClient clientEcowatt;
 
+    private final EcowattObservation ecowattObservation;
+
     private Instant cacheDuree;
     private String token;
 
     public EcowattService(ConfigProperties configProperties,
-                          WebClient.Builder webClientBuilder) {
+                          WebClient.Builder webClientBuilder,
+                          EcowattObservation ecowattObservation) {
         this.configProperties = configProperties;
+        this.ecowattObservation=ecowattObservation;
         HttpClient httpClient = HttpClient
                 .create()
                 .wiretap("reactor.netty.http.client.HttpClient",
@@ -110,6 +114,7 @@ public class EcowattService {
                 .bodyToMono(EcowattDto.class)
                 .map(x -> {
                     LOGGER.info("ecowattDto={}", x);
+                    ecowattObservation.observe(x);
                     return x;
                 });
     }
